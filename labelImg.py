@@ -322,11 +322,12 @@ class MainWindow(QMainWindow, WindowMixin):
         zoom_actions = (self.zoom_widget, zoom_in, zoom_out,
                         zoom_org, fit_window, fit_width)
         self.zoom_mode = self.MANUAL_ZOOM
+        self.zoom_value = 1
         self.scalers = {
             self.FIT_WINDOW: self.scale_fit_window,
             self.FIT_WIDTH: self.scale_fit_width,
             # Set to one to scale to 100% when loading files.
-            self.MANUAL_ZOOM: lambda: 1,
+            self.MANUAL_ZOOM: self.scale_manual,
         }
 
         light = QWidgetAction(self)
@@ -1003,6 +1004,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.actions.fitWidth.setChecked(False)
         self.actions.fitWindow.setChecked(False)
         self.zoom_mode = self.MANUAL_ZOOM
+        self.zoom_value = value / 100
         # Arithmetic on scaling factor often results in float
         # Convert to int to avoid type errors
         self.zoom_widget.setValue(int(value))
@@ -1153,7 +1155,8 @@ class MainWindow(QMainWindow, WindowMixin):
                 self.load_labels(self.label_file.shapes)
             self.set_clean()
             self.canvas.setEnabled(True)
-            self.adjust_scale(initial=True)
+            # self.adjust_scale(initial=True)
+            self.adjust_scale()
             self.paint_canvas()
             self.add_recent_file(self.file_path)
             self.toggle_actions(True)
@@ -1241,6 +1244,9 @@ class MainWindow(QMainWindow, WindowMixin):
         # The epsilon does not seem to work too well here.
         w = self.centralWidget().width() - 2.0
         return w / self.canvas.pixmap.width()
+
+    def scale_manual(self):
+        return self.zoom_value
 
     def closeEvent(self, event):
         if not self.may_continue():
