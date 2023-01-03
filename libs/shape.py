@@ -34,7 +34,7 @@ class Shape(object):
     vertex_fill_color = DEFAULT_VERTEX_FILL_COLOR
     h_vertex_fill_color = DEFAULT_HVERTEX_FILL_COLOR
     point_type = P_ROUND
-    point_size = 16
+    point_size = 8
     scale = 1.0
     label_font_size = 8
 
@@ -135,7 +135,7 @@ class Shape(object):
                 painter.fillPath(line_path, color)
 
     def draw_vertex(self, path, i):
-        d = self.point_size / self.scale
+        d = self.point_size * self.scale
         shape = self.point_type
         point = self.points[i]
         if i == self._highlight_index:
