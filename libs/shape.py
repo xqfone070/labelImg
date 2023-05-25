@@ -135,7 +135,10 @@ class Shape(object):
                 painter.fillPath(line_path, color)
 
     def draw_vertex(self, path, i):
-        d = self.point_size * self.scale
+        if self.scale > 1:
+            d = self.point_size / self.scale
+        else:
+            d = self.point_size
         shape = self.point_type
         point = self.points[i]
         if i == self._highlight_index:
