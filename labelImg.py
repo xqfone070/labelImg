@@ -108,7 +108,9 @@ class MainWindow(QMainWindow, WindowMixin):
         self.screencast = "https://youtu.be/p0nR2YsCY_U"
 
         # Load predefined classes to the list
-        print('default_prefdef_class_file: %s' % default_prefdef_class_file)
+        cwd = os.getcwd()
+        print('current working directory: ', cwd)
+        print('default_predefined_class_file: %s' % default_prefdef_class_file)
         self.load_predefined_classes(default_prefdef_class_file)
 
         if self.label_hist:
@@ -1182,6 +1184,10 @@ class MainWindow(QMainWindow, WindowMixin):
         return '[{} / {}]'.format(self.cur_img_idx + 1, self.img_count)
 
     def show_bounding_box_from_annotation_file(self, file_path):
+        if file_path is None:
+            print('!!!!!something is wrong, file_path is None, show_bounding_box_from_annotation_file')
+            return
+
         if self.default_save_dir is not None:
             basename = os.path.basename(os.path.splitext(file_path)[0])
             xml_path = os.path.join(self.default_save_dir, basename + XML_EXT)
