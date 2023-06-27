@@ -15,6 +15,9 @@
         "closeCur": "Ctrl+W",
         "deleteImg": "Ctrl+Shift+D",
 
+        // add by alex
+        "playImg": ["Ctrl+P", "F1"],
+
         // ***** box operations ***** //
         "boxLineColor": "Ctrl+L",
         "crtBox": "w",
@@ -47,5 +50,9 @@
         // ***** others ***** //
         "singleClsMode": "Ctrl+Shift+S",
         "displayLabel": "Ctrl+Shift+P"
+    },
+
+    play_image: {
+        "interval": 1000
     }
 }

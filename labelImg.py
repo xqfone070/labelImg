@@ -219,6 +219,10 @@ class MainWindow(QMainWindow, WindowMixin):
         self.dock_features = QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetFloatable
         self.dock.setFeatures(self.dock.features() ^ self.dock_features)
 
+        self.play_timer = QTimer(self)
+        self.play_image_num = 0
+        self.play_timer.timeout.connect(self.on_play_image_time_event)
+
         # Actions
         hk = self.config['hot_key']
         action = partial(new_action, self)
@@ -249,6 +253,8 @@ class MainWindow(QMainWindow, WindowMixin):
         open_prev_image = action(get_str('prevImg'), self.open_prev_image,
                                  hk['prevImg'], 'prev', get_str('prevImgDetail'))
 
+        play_image = action(get_str('playImg'), self.start_play_image,
+                                 hk['playImg'], 'play_img', get_str('playImg'), enabled=False)
         verify = action(get_str('verifyImg'), self.verify_image,
                         hk['verifyImg'], 'verify', get_str('verifyImgDetail'))
 
@@ -417,7 +423,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         # Store actions for further handling.
         self.actions = Struct(save=save, save_format=save_format, saveAs=save_as, open=open, close=close,
-                              resetAll=reset_all, deleteImg=delete_image,
+                              resetAll=reset_all, deleteImg=delete_image, play_image=play_image,
                               lineColor=color1, next_box=next_box, prev_box=prev_box,
                               create=create, delete=delete, delete_all=delete_all,
                               edit=edit, copy=copy,
@@ -437,7 +443,7 @@ class MainWindow(QMainWindow, WindowMixin):
                               advancedContext=(create_mode, edit_mode, edit, copy,
                                                delete, delete_all, shape_line_color, shape_fill_color),
                               onLoadActive=(
-                                  close, create, delete_all, create_mode, edit_mode, next_box, prev_box),
+                                  close, create, delete_all, create_mode, edit_mode, next_box, prev_box, play_image),
                               onShapesPresent=(save_as, hide_all, show_all))
 
         self.menus = Struct(
@@ -477,7 +483,8 @@ class MainWindow(QMainWindow, WindowMixin):
             hide_all, show_all, None,
             zoom_in, zoom_out, zoom_org, None,
             fit_window, fit_width, None,
-            light_brighten, light_darken, light_org))
+            light_brighten, light_darken, light_org, None,
+            play_image))
 
         self.menus.file.aboutToShow.connect(self.update_file_menu)
 
@@ -489,13 +496,14 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, open_dir, change_save_dir, open_next_image, open_prev_image, verify, save, save_format, None, create,
-            copy, delete, delete_all, None,
+            open, open_dir, change_save_dir, open_next_image, open_prev_image, play_image,
+            verify, save, save_format, None,
+            create, copy, delete, delete_all, None,
             zoom_in, zoom, zoom_out, fit_window, fit_width, None,
             light_brighten, light, light_darken, light_org)
 
         self.actions.advanced = (
-            open, open_dir, change_save_dir, open_next_image, open_prev_image, save, save_format, None,
+            open, open_dir, change_save_dir, open_next_image, open_prev_image, play_image, save, save_format, None,
             create_mode, edit_mode, None,
             hide_all, show_all)
 
@@ -588,8 +596,12 @@ class MainWindow(QMainWindow, WindowMixin):
             return data
 
     def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key_Control:
+        key = event.key()
+        if key == Qt.Key_Control:
             self.canvas.set_drawing_shape_to_square(False)
+
+        if self.play_image_num > 0:
+            self.stop_play_image()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Control:
@@ -1518,6 +1530,25 @@ class MainWindow(QMainWindow, WindowMixin):
 
         if filename:
             self.load_file(filename)
+
+    def start_play_image(self):
+        if not self.m_img_list:
+            print('image list is empty')
+            return
+
+        interval = self.config['play_image']['interval']
+        print('start_play_image, interval=%d' % interval)
+        self.play_image_num = 0
+        self.play_timer.start(interval)
+
+    def on_play_image_time_event(self):
+        self.play_image_num += 1
+        self.open_next_image()
+        if self.cur_img_idx + 1 >= self.img_count:
+            self.stop_play_image()
+
+    def stop_play_image(self):
+        self.play_timer.stop()
 
     def open_file(self, _value=False):
         if not self.may_continue():
