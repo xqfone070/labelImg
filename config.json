@@ -1,0 +1,51 @@
+{
+    "hot_key": {
+        // ***** file operations ***** //
+        "quit": "Ctrl+Q",
+        "openFile": "Ctrl+O",
+        "openDir": "Ctrl+u",
+        "changeSaveDir": "Ctrl+i",
+        "openAnnotation": "Ctrl+Shift+O",
+        "copyPrevBounding": "Ctrl+v",
+        "nextImg": "d",
+        "prevImg": "a",
+        "verifyImg": "space",
+        "save": "Ctrl+S",
+        "saveAs": "Ctrl+Shift+S",
+        "closeCur": "Ctrl+W",
+        "deleteImg": "Ctrl+Shift+D",
+
+        // ***** box operations ***** //
+        "boxLineColor": "Ctrl+L",
+        "crtBox": "w",
+        "editBox": "Ctrl+J",
+        "delBox": ["Delete", "r"],
+        "dupBox": "Ctrl+D",
+        "advancedMode": "Ctrl+Shift+A",
+        "hideAllBox": "Ctrl+H",
+        "showAllBox": "Ctrl+A",
+        "editLabel": "Ctrl+E",
+
+        // add by alex
+        "delAllBox": ["Ctrl+Delete","Ctrl+r"],
+        "nextBox": "Tab",
+        "prevBox": ["Ctrl+Tab", "Shift+Tab"],
+
+
+        // ***** zoom operations ***** //
+        "zoomin": "Ctrl++",
+        "zoomout": "Ctrl+-",
+        "originalsize": "Ctrl+=",
+        "fitWin": "Ctrl+F",
+        "fitWidth": "Ctrl+Shift+F",
+
+        // ***** light operations ***** //
+        "lightbrighten": "Ctrl+Shift++",
+        "lightdarken": "Ctrl+Shift+-",
+        "lightreset": "Ctrl+Shift+=",
+
+        // ***** others ***** //
+        "singleClsMode": "Ctrl+Shift+S",
+        "displayLabel": "Ctrl+Shift+P"
+    }
+}
