@@ -33,7 +33,7 @@
         "delAllBox": ["Ctrl+Delete","Ctrl+r"],
         "nextBox": "Tab",
         "prevBox": ["Ctrl+Tab", "Shift+Tab"],
-
+        "setLabelDef": "s",
 
         // ***** zoom operations ***** //
         "zoomin": "Ctrl++",

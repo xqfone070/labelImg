@@ -328,6 +328,17 @@ class MainWindow(QMainWindow, WindowMixin):
         edit = action(get_str('editLabel'), self.edit_label,
                       hk['editLabel'], 'edit', get_str('editLabelDetail'),
                       enabled=False)
+        set_def_label = action(get_str('setLabelDef'), self.set_def_label,
+                      hk['setLabelDef'], 'set_label_def', get_str('setLabelDefDetail'),
+                      enabled=False)
+
+        set_label_index_actions = []
+        for i in range(1, 10):
+            text = get_str('setLabelN') % i
+            f = partial(self.set_label_index, i - 1)
+            hotkey = str(i)
+            set_label_index = action(text, f, hotkey, icon=None, tip=None, enabled=False)
+            set_label_index_actions.append(set_label_index)
 
         help_default = action(get_str('tutorialDefault'), self.show_default_tutorial_dialog,
                               None, 'help', get_str('tutorialDetail'))
@@ -426,7 +437,7 @@ class MainWindow(QMainWindow, WindowMixin):
                               resetAll=reset_all, deleteImg=delete_image, play_image=play_image,
                               lineColor=color1, next_box=next_box, prev_box=prev_box,
                               create=create, delete=delete, delete_all=delete_all,
-                              edit=edit, copy=copy,
+                              edit=edit, copy=copy, set_def_label=set_def_label,
                               createMode=create_mode, editMode=edit_mode, advancedMode=advanced_mode,
                               shapeLineColor=shape_line_color, shapeFillColor=shape_fill_color,
                               zoom=zoom, zoomIn=zoom_in, zoomOut=zoom_out, zoomOrg=zoom_org,
@@ -437,20 +448,22 @@ class MainWindow(QMainWindow, WindowMixin):
                               fileMenuActions=(
                                   open, open_dir, save, save_as, close, reset_all, quit),
                               beginner=(), advanced=(),
-                              editMenu=(edit, copy, delete, delete_all,
+                              editMenu=(edit, set_def_label, copy, delete, delete_all,
                                         None, color1, self.draw_squares_option, next_box, prev_box),
-                              beginnerContext=(create, edit, copy, delete, delete_all),
-                              advancedContext=(create_mode, edit_mode, edit, copy,
+                              beginnerContext=(create, edit, set_def_label, copy, delete, delete_all),
+                              advancedContext=(create_mode, edit_mode, edit, set_def_label, copy,
                                                delete, delete_all, shape_line_color, shape_fill_color),
                               onLoadActive=(
                                   close, create, delete_all, create_mode, edit_mode, next_box, prev_box, play_image),
-                              onShapesPresent=(save_as, hide_all, show_all))
+                              onShapesPresent=(save_as, hide_all, show_all),
+                              set_label_index=set_label_index_actions)
 
         self.menus = Struct(
             file=self.menu(get_str('menu_file')),
             edit=self.menu(get_str('menu_edit')),
             view=self.menu(get_str('menu_view')),
             help=self.menu(get_str('menu_help')),
+            hide=self.menu('hide'),
             recentFiles=QMenu(get_str('menu_openRecent')),
             labelList=label_menu)
 
@@ -485,6 +498,10 @@ class MainWindow(QMainWindow, WindowMixin):
             fit_window, fit_width, None,
             light_brighten, light_darken, light_org, None,
             play_image))
+
+        add_actions(self.menus.hide, (*set_label_index_actions, None))
+        # hide menu
+        self.menus.hide.menuAction().setVisible(False)
 
         self.menus.file.aboutToShow.connect(self.update_file_menu)
 
@@ -823,6 +840,43 @@ class MainWindow(QMainWindow, WindowMixin):
             self.set_dirty()
             self.update_combo_box()
 
+    def set_def_label(self):
+        if not self.canvas.editing():
+            return
+        item = self.current_item()
+        if not item:
+            return
+        if not self.use_default_label_checkbox.isChecked():
+            return
+
+        text = self.default_label
+        if text is None:
+            return
+
+        item.setText(text)
+        item.setBackground(generate_color_by_text(text))
+        self.set_dirty()
+        self.update_combo_box()
+
+
+    def set_label_index(self, index):
+        if not self.canvas.editing():
+            return
+        item = self.current_item()
+        if not item:
+            return
+
+        if index < 0 or index >= len(self.label_hist):
+            return
+
+        text = self.label_hist[index]
+
+        item.setText(text)
+        item.setBackground(generate_color_by_text(text))
+        self.set_dirty()
+        self.update_combo_box()
+
+
     # Tzutalin 20160906 : Add file list and dock to move faster
     def file_item_double_clicked(self, item=None):
         self.cur_img_idx = self.m_img_list.index(ustr(item.text()))
@@ -870,8 +924,11 @@ class MainWindow(QMainWindow, WindowMixin):
         self.actions.delete.setEnabled(selected)
         self.actions.copy.setEnabled(selected)
         self.actions.edit.setEnabled(selected)
+        self.actions.set_def_label.setEnabled(selected)
         self.actions.shapeLineColor.setEnabled(selected)
         self.actions.shapeFillColor.setEnabled(selected)
+        for set_label_index in self.actions.set_label_index:
+            set_label_index.setEnabled(selected)
 
     def add_label(self, shape):
         if shape is None:
@@ -1295,7 +1352,8 @@ class MainWindow(QMainWindow, WindowMixin):
         assert not self.image.isNull(), "cannot paint null image"
         self.canvas.scale = 0.01 * self.zoom_widget.value()
         self.canvas.overlay_color = self.light_widget.color()
-        self.canvas.label_font_size = int(0.02 * max(self.image.width(), self.image.height()))
+        # alex mod, original ratio = 0.02
+        self.canvas.label_font_size = int(0.015 * max(self.image.width(), self.image.height()))
         self.canvas.adjustSize()
         self.canvas.update()
 
